@@ -1,5 +1,6 @@
 
 const express = require("express")
+const { request } = require("http")
 
 const app = express()
 
@@ -59,3 +60,27 @@ const drugs = [
 ]
 
 //APIs
+//GET /drugs/antibiotics: Return all drugs where category is "Antibiotic"
+app.get("/drugs/antibiotics", (request, response) => {
+    const antibiotics = drugs.filter(each => each.category === "Antibiotic")
+    response.json(antibiotics)
+})
+
+//GET /drugs/names: Return an array of all drug names converted to lowercase.
+app.get("/drugs/names", (requst, response) => {
+    const names = drugs.map(each => each.name.toLowerCase)
+    response.json()
+})
+
+//POST /drugs/by-category:Accept a category in the body and return all drugs under that category.Example body: { "category": "Antibiotic" }
+app.post('/drugs/by-category', (request, response) => {
+    const { category } = request.body;
+  
+    if (!category) {
+      return response.status(400).json({ error: "Category is required in request body." });
+    }
+  
+    const result = drugs.filter(each => each.category === category);
+  
+    response.json(result);
+  });
