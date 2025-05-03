@@ -72,10 +72,10 @@ app.get("/drugs/names", (requst, response) => {
 })
 
 //POST /drugs/by-category:Accept a category in the body and return all drugs under that category.Example body: { "category": "Antibiotic" }
-app.post('/drugs/by-category', (request, response) => {
-    const acceptCategory = request.body.category;
+app.post("/drugs/by-category", (request, response) => {
+    const category = request.body.category;
 
-    const check = drugs.find(each => each.category.toLowerCase() === acceptCategory.toLowerCase())
+    const check = drugs.find(each => each.category.toLowerCase() === category.toLowerCase())
   
     if (!check) {
       response.json({ error: "Category is required in request body." });
