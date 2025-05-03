@@ -1,6 +1,5 @@
 
 const express = require("express")
-const { request } = require("http")
 
 const app = express()
 
@@ -9,7 +8,7 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 6000
 
-app.listen(5000, function() {
+app.listen(6000, function() {
     console.log(`Server is running on port ${PORT}`)
 })
 
@@ -68,19 +67,92 @@ app.get("/drugs/antibiotics", (request, response) => {
 
 //GET /drugs/names: Return an array of all drug names converted to lowercase.
 app.get("/drugs/names", (requst, response) => {
-    const names = drugs.map(each => each.name.toLowerCase)
-    response.json()
+    const names = drugs.map(each => each.name.toLowerCase())
+    response.json(names)
 })
 
 //POST /drugs/by-category:Accept a category in the body and return all drugs under that category.Example body: { "category": "Antibiotic" }
 app.post('/drugs/by-category', (request, response) => {
-    const { category } = request.body;
+    const acceptCategory = request.body.category;
+
+    const check = drugs.find(each => each.category.toLowerCase() === acceptCategory.toLowerCase())
   
-    if (!category) {
-      return response.status(400).json({ error: "Category is required in request body." });
-    }
+    if (!check) {
+      response.json({ error: "Category is required in request body." });
+    }else{
   
     const result = drugs.filter(each => each.category === category);
   
     response.json(result);
+    }
   });
+
+  //GET /drugs/names-manufacturers: Return an array of objects showing each drug’s name and manufacturer.
+
+  app.get("/drugs/names-manufacturers", (req, res) => {
+    const drugNameAndManufacturer = drugs.map(each => each.name + " - "+ each.manufacturer)
+    res.json(drugNameAndManufacturer)
+  })
+
+  //GET /drugs/prescription: Return all drugs where isPrescriptionOnly is true.
+  app.get("/drugs/prescription", (req, res) => {
+    const prescriptionDrugs = drugs.filter(each => each.isPrescriptionOnly == true)
+    res.json(prescriptionDrugs)
+  })
+
+
+  //GET /drugs/formatted: Return a new array where each item is a string like:"Drug: [name] - [dosageMg]mg
+  app.get("/drugs/formatted", (req, res) => {
+
+    const formatted = drugs.map(each => `Drugs:[${each.name}] - [${each.dosageMg}]mg`)
+
+    res.json(formatted)
+  })
+
+
+  //GET /drugs/low-stock: Return all drugs where stock is less than 50.
+
+  app.get("/drugs/low-stock", (req, res) => {
+
+    const withStockLessThan50 = drugs.filter(each => each.stock < 50)
+
+    res.json(withStockLessThan50)
+  })
+
+  
+  //GET /drugs/non-prescription:Return all drugs where isPrescriptionOnly is false.
+
+  app.get("/drugs/non-prescription", (req, res) => {
+
+    const notPrescriptionDrugs = drugs.filter(each => each.isPrescriptionOnly == false)
+
+    res.json(notPrescriptionDrugs)
+  })
+
+
+  // POST /drugs/manufacturer-count:Accept a manufacturer in the body and return how many drugs are produced by that manufacturer.Example body: { "manufacturer": "Pfizer" }
+
+  app.post("/drugs/manufacturer-count", (req, res) => {
+    const acceptManufacturer = req.body.manufacturer
+    const manufacturerDrugs = drugs.filter(each => each.manufacturer === manufacturer).length
+    res.json({
+        message: `${acceptManufacturer} manufactured ${manufacturerDrugs} drugs`
+  })
+
+})
+
+
+//GET /drugs/count-analgesics:Count and return how many drugs have the category "Analgesic"
+
+app.get("/drugs/count-analgesics", (req, res) => {
+
+    let analgesicsCount = 0
+    drugs.forEach( function( each) {
+        if(each.category === "Analgesic") {
+            analgesicsCount++
+        }
+    })
+    res.json(analgesicsCount)
+})
+
+
